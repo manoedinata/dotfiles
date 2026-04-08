@@ -1,0 +1,2 @@
+export ON_DISTROBOX=1
+xhost +si:localuser:$USER >/dev/null
