@@ -10,6 +10,7 @@ alias grep='grep --color=auto'
 PS1='[\u@\h \W]\$ '
 
 export PATH="$PATH:~/.local/bin"
+export PATH="$PATH:~/go/bin"
 
 # Starship
 eval "$(starship init bash)"
