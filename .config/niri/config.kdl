@@ -98,7 +98,8 @@ output "HDMI-A-1" {
 // https://yalter.github.io/niri/Configuration:-Layout
 layout {
     // Set gaps around windows in logical pixels.
-    gaps 16
+    //gaps 16
+    gaps 0
 
     // When to center a column when changing focus, options are:
     // - "never", default behavior, focusing an off-screen column will keep at the left
@@ -364,7 +365,9 @@ binds {
     Mod+T hotkey-overlay-title="Terminal" { spawn "gnome-terminal"; }
     Ctrl+Alt+T hotkey-overlay-title="Terminal" { spawn "gnome-terminal"; } 
     //Mod+Space hotkey-overlay-title="App Launcher" { spawn "fuzzel"; }
-    Mod+Space hotkey-overlay-title="App Launcher" { spawn-sh "pkill -x fuzzel || exec fuzzel"; }
+    //Mod+Space hotkey-overlay-title="App Launcher" { spawn-sh "pkill -x fuzzel || exec fuzzel"; }
+    Mod+Space hotkey-overlay-title="Launcher" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
+    Mod+Backslash hotkey-overlay-title="Settings" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "settings" "toggle"; }
 
     Mod+1 hotkey-overlay-title="Google Chrome" { spawn "google-chrome-stable"; }
     Mod+2 hotkey-overlay-title="Files" { spawn "nautilus"; }
