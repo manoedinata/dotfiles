@@ -1,0 +1,2 @@
+# On charger unplug, release the NVIDIA audio function so the GPU can sleep.
+ACTION=="change", SUBSYSTEM=="power_supply", KERNEL=="ACAD", ATTR{online}=="0", RUN+="/usr/bin/systemctl --no-block start nvidia-audio-kick.service"

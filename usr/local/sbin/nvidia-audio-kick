@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# After unplugging the charger, the NVIDIA HDMI audio function can stay active
+# with nothing using it. Because it depends on the GPU, that keeps the GPU awake.
+# Toggling its runtime PM control makes the kernel re-check idle, so both sleep.
+# Runs from nvidia-audio-kick.service, which the udev rule starts on unplug.
+
+AUDIO=/sys/bus/pci/devices/0000:01:00.1
+POWER=$AUDIO/power
+
+sleep 10
+
+if [ ! -d "$AUDIO" ]; then
+    echo "skip: GPU audio not on the bus"
+    exit 0
+fi
+if grep -qx 1 /sys/class/power_supply/*/online 2>/dev/null; then
+    echo "skip: back on AC"
+    exit 0
+fi
+status=$(cat "$POWER/runtime_status")
+usage=$(cat "$POWER/runtime_usage")
+if [ "$status" != active ] || [ "$usage" != 0 ]; then
+    echo "skip: audio status=$status usage=$usage"
+    exit 0
+fi
+if grep -qsv '^closed' /proc/asound/NVidia/pcm*p/sub*/status; then
+    echo "skip: HDMI audio in use"
+    exit 0
+fi
+
+echo "kick: audio active and idle, toggling runtime PM"
+echo on > "$POWER/control"
+sleep 1
+echo auto > "$POWER/control"

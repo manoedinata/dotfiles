@@ -1,0 +1,6 @@
+[Unit]
+Description=Release idle NVIDIA HDMI audio so the GPU can sleep
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nvidia-audio-kick
