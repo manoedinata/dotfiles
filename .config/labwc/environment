@@ -1,0 +1,2 @@
+# Font DPI for Qt apps (96 x 1.25), since display scale stays at 1.
+QT_FONT_DPI=120

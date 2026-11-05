@@ -1,0 +1,4 @@
+#!/bin/sh
+# Start labwc on the locally patched wlroots (see ~/.local/opt/wlroots-patched/fractional-snap.patch).
+export LD_LIBRARY_PATH="$HOME/.local/opt/wlroots-patched/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec labwc "$@"

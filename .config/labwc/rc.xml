@@ -1,0 +1,159 @@
+<?xml version="1.0"?>
+<labwc_config>
+  <desktops number="2" />
+
+  <theme>
+    <name>Dank</name>
+    <cornerRadius>10</cornerRadius>
+    <titlebar>
+      <layout>icon:iconify,max,close</layout>
+      <showTitle>yes</showTitle>
+    </titlebar>
+    <font place="ActiveWindow">
+      <name>Noto Sans</name>
+      <size>13</size>
+      <weight>medium</weight>
+    </font>
+    <font place="InactiveWindow">
+      <name>Noto Sans</name>
+      <size>13</size>
+      <weight>medium</weight>
+    </font>
+    <font place="OnScreenDisplay">
+      <name>Noto Sans</name>
+      <size>13</size>
+    </font>
+  </theme>
+
+  <windowSwitcher preview="yes" outlines="yes" allWorkspaces="no">
+    <osd show="yes" style="thumbnail" output="focused" thumbnailLabelFormat="%T" />
+  </windowSwitcher>
+
+  <keyboard>
+    <default />
+    <!-- Ported from niri: DMS IPC also shows the on-screen display. -->
+    <!-- The laptop's PrtSc key sends Win+Shift+S unless Fn is held. -->
+    <keybind key="W-d"><action name="Execute" command="dms ipc call spotlight toggle" /></keybind>
+    <keybind key="W-space"><action name="Execute" command="dms ipc call spotlight toggle" /></keybind>
+    <keybind key="W-t"><action name="Execute" command="alacritty" /></keybind>
+    <keybind key="KP_Add"><action name="Execute" command="dms ipc call control-center toggle" /></keybind>
+    <keybind key="KP_Enter"><action name="Execute" command="dms ipc call powermenu toggle" /></keybind>
+    <keybind key="W-x"><action name="Execute" command="dms ipc call powermenu toggle" /></keybind>
+    <keybind key="W-p"><action name="Execute" command="dms ipc call displayMode toggle" /></keybind>
+    <keybind key="W-S-m"><action name="Execute" command="/home/nata/.local/bin/display-mode toggle" /></keybind>
+    <keybind key="W-S-p"><action name="Execute" command="/home/nata/.local/bin/dpms-toggle" /></keybind>
+    <keybind key="W-A-l"><action name="Execute" command="dms ipc call lock lock" /></keybind>
+    <keybind key="W-A-s"><action name="Execute" command="sh -c 'pkill orca || exec orca'" /></keybind>
+    <keybind key="W-S-slash"><action name="Execute" command="dms ipc call keybinds toggleWithPath sway /home/nata/.config/labwc/keybinds.conf" /></keybind>
+    <keybind key="W-Escape"><action name="ToggleKeybinds" /></keybind>
+    <keybind key="W-S-e"><action name="Exit" /></keybind>
+    <keybind key="C-A-Delete"><action name="Exit" /></keybind>
+    <keybind key="W-q"><action name="Close" /></keybind>
+    <keybind key="W-f"><action name="ToggleMaximize" /></keybind>
+    <keybind key="W-m"><action name="ToggleMaximize" /></keybind>
+    <keybind key="W-C-f"><action name="ToggleMaximize" /></keybind>
+    <keybind key="KP_Begin"><action name="ToggleMaximize" /></keybind>
+    <keybind key="W-S-f"><action name="ToggleFullscreen" /></keybind>
+    <keybind key="W-c"><action name="AutoPlace" policy="center" /></keybind>
+    <keybind key="W-Left"><action name="PreviousWindow" /></keybind>
+    <keybind key="W-Up"><action name="PreviousWindow" /></keybind>
+    <keybind key="W-h"><action name="PreviousWindow" /></keybind>
+    <keybind key="W-k"><action name="PreviousWindow" /></keybind>
+    <keybind key="KP_Left"><action name="PreviousWindow" /></keybind>
+    <keybind key="W-Right"><action name="NextWindow" /></keybind>
+    <keybind key="W-Down"><action name="NextWindow" /></keybind>
+    <keybind key="W-l"><action name="NextWindow" /></keybind>
+    <keybind key="W-j"><action name="NextWindow" /></keybind>
+    <keybind key="KP_Right"><action name="NextWindow" /></keybind>
+    <keybind key="W-C-Left"><action name="SnapToEdge" direction="left" /></keybind>
+    <keybind key="W-S-Left"><action name="FocusOutput" direction="left" /></keybind>
+    <keybind key="W-S-C-Left"><action name="MoveToOutput" direction="left" /></keybind>
+    <keybind key="W-C-Right"><action name="SnapToEdge" direction="right" /></keybind>
+    <keybind key="W-S-Right"><action name="FocusOutput" direction="right" /></keybind>
+    <keybind key="W-S-C-Right"><action name="MoveToOutput" direction="right" /></keybind>
+    <keybind key="W-C-Up"><action name="SnapToEdge" direction="up" /></keybind>
+    <keybind key="W-S-Up"><action name="FocusOutput" direction="up" /></keybind>
+    <keybind key="W-S-C-Up"><action name="MoveToOutput" direction="up" /></keybind>
+    <keybind key="W-C-Down"><action name="SnapToEdge" direction="down" /></keybind>
+    <keybind key="W-S-Down"><action name="FocusOutput" direction="down" /></keybind>
+    <keybind key="W-S-C-Down"><action name="MoveToOutput" direction="down" /></keybind>
+    <keybind key="W-C-h"><action name="SnapToEdge" direction="left" /></keybind>
+    <keybind key="W-S-h"><action name="FocusOutput" direction="left" /></keybind>
+    <keybind key="W-S-C-h"><action name="MoveToOutput" direction="left" /></keybind>
+    <keybind key="W-C-l"><action name="SnapToEdge" direction="right" /></keybind>
+    <keybind key="W-S-l"><action name="FocusOutput" direction="right" /></keybind>
+    <keybind key="W-S-C-l"><action name="MoveToOutput" direction="right" /></keybind>
+    <keybind key="W-C-k"><action name="SnapToEdge" direction="up" /></keybind>
+    <keybind key="W-S-k"><action name="FocusOutput" direction="up" /></keybind>
+    <keybind key="W-S-C-k"><action name="MoveToOutput" direction="up" /></keybind>
+    <keybind key="W-C-j"><action name="SnapToEdge" direction="down" /></keybind>
+    <keybind key="W-S-j"><action name="FocusOutput" direction="down" /></keybind>
+    <keybind key="W-S-C-j"><action name="MoveToOutput" direction="down" /></keybind>
+    <keybind key="KP_Home"><action name="SnapToEdge" direction="left" /></keybind>
+    <keybind key="KP_Prior"><action name="SnapToEdge" direction="right" /></keybind>
+    <keybind key="W-C-Home"><action name="MoveToEdge" direction="left" /></keybind>
+    <keybind key="W-C-End"><action name="MoveToEdge" direction="right" /></keybind>
+    <keybind key="W-minus"><action name="ResizeRelative" right="-192" /></keybind>
+    <keybind key="W-equal"><action name="ResizeRelative" right="192" /></keybind>
+    <keybind key="W-S-minus"><action name="ResizeRelative" bottom="-108" /></keybind>
+    <keybind key="W-S-equal"><action name="ResizeRelative" bottom="108" /></keybind>
+    <keybind key="W-1"><action name="GoToDesktop" to="1" /></keybind>
+    <keybind key="W-C-1"><action name="SendToDesktop" to="1" /></keybind>
+    <keybind key="W-S-1"><action name="SendToDesktop" to="1" /></keybind>
+    <keybind key="W-2"><action name="GoToDesktop" to="2" /></keybind>
+    <keybind key="W-C-2"><action name="SendToDesktop" to="2" /></keybind>
+    <keybind key="W-S-2"><action name="SendToDesktop" to="2" /></keybind>
+    <keybind key="W-Next"><action name="GoToDesktop" to="right" /></keybind>
+    <keybind key="W-u"><action name="GoToDesktop" to="right" /></keybind>
+    <keybind key="KP_Down"><action name="GoToDesktop" to="right" /></keybind>
+    <keybind key="W-Prior"><action name="GoToDesktop" to="left" /></keybind>
+    <keybind key="W-i"><action name="GoToDesktop" to="left" /></keybind>
+    <keybind key="KP_Up"><action name="GoToDesktop" to="left" /></keybind>
+    <keybind key="W-C-Next"><action name="SendToDesktop" to="right" /></keybind>
+    <keybind key="W-C-u"><action name="SendToDesktop" to="right" /></keybind>
+    <keybind key="W-C-Prior"><action name="SendToDesktop" to="left" /></keybind>
+    <keybind key="W-C-i"><action name="SendToDesktop" to="left" /></keybind>
+    <keybind key="XF86MonBrightnessUp"><action name="Execute" command='dms ipc call brightness increment 10 ""' /></keybind>
+    <keybind key="XF86MonBrightnessDown"><action name="Execute" command='dms ipc call brightness decrement 10 ""' /></keybind>
+    <keybind key="XF86AudioRaiseVolume"><action name="Execute" command="dms ipc call audio increment 10" /></keybind>
+    <keybind key="XF86AudioLowerVolume"><action name="Execute" command="dms ipc call audio decrement 10" /></keybind>
+    <keybind key="XF86AudioMute"><action name="Execute" command="dms ipc call audio mute" /></keybind>
+    <keybind key="XF86AudioMicMute"><action name="Execute" command="dms ipc call audio micmute" /></keybind>
+    <keybind key="XF86AudioPlay"><action name="Execute" command="dms ipc call mpris playPause" /></keybind>
+    <keybind key="XF86AudioStop"><action name="Execute" command="dms ipc call mpris stop" /></keybind>
+    <keybind key="XF86AudioPrev"><action name="Execute" command="dms ipc call mpris previous" /></keybind>
+    <keybind key="XF86AudioNext"><action name="Execute" command="dms ipc call mpris next" /></keybind>
+    <keybind key="Print"><action name="Execute" command="dms screenshot region" /></keybind>
+    <keybind key="W-S-s"><action name="Execute" command="dms screenshot region" /></keybind>
+    <keybind key="C-Print"><action name="Execute" command="dms screenshot full" /></keybind>
+    <keybind key="A-Print"><action name="Execute" command="dms screenshot window" /></keybind>
+  </keyboard>
+
+  <mouse>
+    <default />
+    <!-- Clear labwc's root menu so the click reaches the DMS desktop menu. -->
+    <context name="Root">
+      <mousebind button="Left" action="Press"><action name="None" /></mousebind>
+      <mousebind button="Right" action="Press"><action name="None" /></mousebind>
+      <mousebind button="Middle" action="Press"><action name="None" /></mousebind>
+    </context>
+    <context name="All">
+      <mousebind direction="W-Down" action="Scroll"><action name="GoToDesktop" to="right" /></mousebind>
+      <mousebind direction="W-Up" action="Scroll"><action name="GoToDesktop" to="left" /></mousebind>
+      <mousebind direction="C-W-Down" action="Scroll"><action name="SendToDesktop" to="right" /></mousebind>
+      <mousebind direction="C-W-Up" action="Scroll"><action name="SendToDesktop" to="left" /></mousebind>
+      <mousebind direction="W-Right" action="Scroll"><action name="NextWindow" /></mousebind>
+      <mousebind direction="W-Left" action="Scroll"><action name="PreviousWindow" /></mousebind>
+      <mousebind direction="S-W-Down" action="Scroll"><action name="NextWindow" /></mousebind>
+      <mousebind direction="S-W-Up" action="Scroll"><action name="PreviousWindow" /></mousebind>
+    </context>
+  </mouse>
+
+  <libinput>
+    <device category="touchpad">
+      <naturalScroll>yes</naturalScroll>
+      <tap>yes</tap>
+      <disableWhileTyping>yes</disableWhileTyping>
+    </device>
+  </libinput>
+</labwc_config>

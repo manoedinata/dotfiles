@@ -18,7 +18,7 @@
       "leftWidgets": [
         "launcherButton",
         "workspaceSwitcher",
-        "focusedWindow"
+        "runningApps"
       ],
       "centerWidgets": [
         "music",
@@ -66,7 +66,7 @@
       "widgetOutlineColor": "primary",
       "widgetOutlineOpacity": 1,
       "widgetOutlineThickness": 1,
-      "fontScale": 1,
+      "fontScale": 1.2,
       "iconScale": 1,
       "autoHide": false,
       "autoHideStrict": false,
@@ -96,6 +96,97 @@
       "hoverPopoutDelay": 150,
       "island": false,
       "dot": false
+    },
+    {
+      "id": "dot1793875358751",
+      "name": "Dot",
+      "enabled": false,
+      "position": 0,
+      "screenPreferences": [
+        "all"
+      ],
+      "showOnLastDisplay": true,
+      "leftWidgets": [
+        "launcherButton",
+        "workspaceSwitcher",
+        "runningApps"
+      ],
+      "centerWidgets": [
+        "music",
+        "clock",
+        "weather"
+      ],
+      "rightWidgets": [
+        "systemTray",
+        "clipboard",
+        "cpuUsage",
+        "memUsage",
+        "notificationButton",
+        "battery",
+        "controlCenterButton"
+      ],
+      "spacing": 4,
+      "innerPadding": 6,
+      "barInsetPadding": -1,
+      "barLengthPadding": 0,
+      "barLengthMode": "full",
+      "barLengthPercent": 80,
+      "bottomGap": 0,
+      "attachToScreenEdge": false,
+      "followInterfaceStyle": false,
+      "transparency": 1,
+      "surfaceColor": "default",
+      "surfaceCustomColor": "#6750A4",
+      "widgetFollowInterfaceStyle": true,
+      "widgetTransparency": 1,
+      "squareCorners": false,
+      "noBackground": false,
+      "widgetStyle": "pills",
+      "maximizeWidgetIcons": false,
+      "maximizeWidgetText": false,
+      "widgetPadding": 10,
+      "batteryColorMode": "theme",
+      "gothCornersEnabled": false,
+      "gothCornerRadiusOverride": false,
+      "gothCornerRadiusValue": 12,
+      "borderEnabled": false,
+      "borderColor": "surfaceText",
+      "borderOpacity": 1,
+      "borderThickness": 1,
+      "widgetOutlineEnabled": false,
+      "widgetOutlineColor": "primary",
+      "widgetOutlineOpacity": 1,
+      "widgetOutlineThickness": 1,
+      "fontScale": 1.2,
+      "iconScale": 1,
+      "autoHide": false,
+      "autoHideStrict": false,
+      "autoHideDelay": 250,
+      "showOnWindowsOpen": false,
+      "openOnOverview": false,
+      "visible": true,
+      "popupGapsAuto": true,
+      "popupGapsManual": 4,
+      "maximizeDetection": true,
+      "useOverlayLayer": false,
+      "hideOnFullscreen": false,
+      "scrollEnabled": true,
+      "scrollXBehavior": "focusWindow",
+      "scrollYBehavior": "workspace",
+      "middleClickAction": "none",
+      "rightClickAction": "none",
+      "clickActionFollowMouse": false,
+      "shadowIntensity": 0,
+      "shadowOpacity": 60,
+      "shadowColorMode": "default",
+      "shadowCustomColor": "#000000",
+      "shadowDirectionMode": "inherit",
+      "shadowDirection": "top",
+      "clickThrough": false,
+      "hoverPopouts": false,
+      "hoverPopoutDelay": 150,
+      "island": false,
+      "dot": true
     }
   ],
   "density": "spacious",
@@ -105,123 +196,183 @@
       "id": "user",
       "enabled": true,
       "w": 5,
-      "h": 1
+      "h": 1,
+      "col": 0,
+      "row": 0
     },
     {
       "id": "settings",
       "enabled": true,
       "w": 1,
       "h": 1,
-      "small": true
+      "small": true,
+      "col": 5,
+      "row": 0
     },
     {
       "id": "lock",
       "enabled": true,
       "w": 1,
       "h": 1,
-      "small": true
+      "small": true,
+      "col": 6,
+      "row": 0
     },
     {
       "id": "power",
       "enabled": true,
       "w": 1,
       "h": 1,
-      "small": true
+      "small": true,
+      "col": 7,
+      "row": 0
     },
     {
       "id": "brightnessSlider",
       "enabled": true,
       "w": 4,
       "h": 1,
-      "small": true
+      "small": true,
+      "col": 0,
+      "row": 1
     },
     {
       "id": "volumeSlider",
       "enabled": true,
       "w": 4,
       "h": 1,
-      "small": true
+      "small": true,
+      "col": 4,
+      "row": 1
     },
     {
       "id": "wifi",
       "enabled": true,
       "w": 4,
-      "h": 1
+      "h": 1,
+      "col": 0,
+      "row": 2
     },
     {
       "id": "bluetooth",
       "enabled": true,
       "w": 4,
-      "h": 1
+      "h": 1,
+      "col": 4,
+      "row": 2
     },
     {
       "id": "audioOutput",
       "enabled": true,
       "w": 4,
-      "h": 1
+      "h": 1,
+      "col": 0,
+      "row": 3
     },
     {
       "id": "audioInput",
       "enabled": true,
       "w": 4,
-      "h": 1
+      "h": 1,
+      "col": 4,
+      "row": 3
     },
     {
       "id": "darkMode",
       "enabled": true,
       "w": 2,
-      "h": 1
+      "h": 1,
+      "col": 0,
+      "row": 4
     },
     {
       "id": "nightMode",
       "enabled": true,
       "w": 2,
-      "h": 1
+      "h": 1,
+      "col": 2,
+      "row": 4
     },
     {
       "id": "doNotDisturb",
       "enabled": true,
       "w": 2,
-      "h": 1
+      "h": 1,
+      "col": 4,
+      "row": 4
     },
     {
       "id": "idleInhibitor",
       "enabled": true,
       "w": 2,
-      "h": 1
+      "h": 1,
+      "col": 6,
+      "row": 4
     },
     {
       "id": "battery",
       "enabled": true,
       "w": 4,
-      "h": 1
+      "h": 1,
+      "col": 0,
+      "row": 5
     },
     {
       "id": "diskUsage",
       "enabled": true,
       "w": 4,
-      "h": 1
+      "h": 1,
+      "col": 4,
+      "row": 5
     },
     {
       "id": "runningApps",
       "enabled": true,
       "w": 7,
       "h": 1,
-      "small": true
+      "small": true,
+      "col": 0,
+      "row": 7
     },
     {
       "id": "edit",
       "enabled": true,
       "w": 1,
       "h": 1,
-      "small": true
+      "small": false,
+      "col": 7,
+      "row": 7
     },
     {
       "id": "plugin_displayMode",
       "enabled": true,
-      "w": 4,
-      "h": 1
+      "w": 8,
+      "h": 1,
+      "col": 0,
+      "row": 6
     }
   ],
-  "avatarRing": "primary"
+  "avatarRing": "primary",
+  "fontScale": 1.25,
+  "desktopContextMenu": "on",
+  "desktopWidgetInstances": [
+    {
+      "id": "dw_1793878781689_fych0x6ao",
+      "widgetType": "desktopClock",
+      "name": "Clock",
+      "enabled": true,
+      "config": {
+        "style": "analog",
+        "transparency": 0.8,
+        "colorMode": "primary",
+        "customColor": "#ffffff",
+        "showDate": true,
+        "showAnalogNumbers": false,
+        "showAnalogSeconds": true,
+        "displayPreferences": [
+          "all"
+        ]
+      }
+    }
+  ]
 }

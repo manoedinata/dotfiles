@@ -1,0 +1,5 @@
+[Unit]
+Description=labwc session
+BindsTo=graphical-session.target
+Wants=graphical-session-pre.target dms.service
+After=graphical-session-pre.target

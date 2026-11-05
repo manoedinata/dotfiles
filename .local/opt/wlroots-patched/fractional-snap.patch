@@ -1,0 +1,35 @@
+--- /tmp/claude-1000/-home-nata/1ee30e75-999b-470e-8121-80be9bcb8f9a/scratchpad/wlr_scene.c.orig	2026-11-05 18:08:07.764474496 +0700
++++ types/scene/wlr_scene.c	2026-11-05 18:08:07.771649102 +0700
+@@ -1435,14 +1435,30 @@
+ 			wlr_output_transform_invert(scene_buffer->transform);
+ 		transform = wlr_output_transform_compose(transform, data->transform);
+ 
++		// Local patch: at fractional scale, dst_box depends on the node offset
++		// and can land 1px away from the client's buffer size. Stretching by
++		// that pixel smears the whole surface, so draw it 1:1 instead.
++		struct wlr_box snapped_box = dst_box;
++		enum wlr_scale_filter_mode filter_mode = scene_buffer->filter_mode;
++		if (transform == WL_OUTPUT_TRANSFORM_NORMAL) {
++			bool has_src = !wlr_fbox_empty(&scene_buffer->src_box);
++			int src_width = has_src ? (int)lround(scene_buffer->src_box.width) : (int)texture->width;
++			int src_height = has_src ? (int)lround(scene_buffer->src_box.height) : (int)texture->height;
++			if (abs(src_width - dst_box.width) <= 1 && abs(src_height - dst_box.height) <= 1) {
++				snapped_box.width = src_width;
++				snapped_box.height = src_height;
++				filter_mode = WLR_SCALE_FILTER_NEAREST;
++			}
++		}
++
+ 		wlr_render_pass_add_texture(data->render_pass, &(struct wlr_render_texture_options) {
+ 			.texture = texture,
+ 			.src_box = scene_buffer->src_box,
+-			.dst_box = dst_box,
++			.dst_box = snapped_box,
+ 			.transform = transform,
+ 			.clip = &render_region,
+ 			.alpha = &scene_buffer->opacity,
+-			.filter_mode = scene_buffer->filter_mode,
++			.filter_mode = filter_mode,
+ 			.blend_mode = !data->output->scene->calculate_visibility ||
+ 					!pixman_region32_empty(&opaque) ?
+ 				WLR_RENDER_BLEND_MODE_PREMULTIPLIED : WLR_RENDER_BLEND_MODE_NONE,

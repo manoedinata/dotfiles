@@ -1,0 +1,10 @@
+#!/bin/sh
+# Toggle monitor power. labwc does not wake outputs on input, so the same key turns them back on.
+state="$XDG_RUNTIME_DIR/dpms-off"
+if [ -e "$state" ]; then
+    rm -f "$state"
+    dms dpms on
+else
+    touch "$state"
+    dms dpms off
+fi

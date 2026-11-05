@@ -1,0 +1,7 @@
+# labwc has no output config of its own, so set the panel scale here.
+wlr-randr --output eDP-2 --scale 1
+# Font DPI for X11 apps (96 x 1.25).
+echo "Xft.dpi: 120" | xrdb -merge
+
+# Start the user session target, which pulls in graphical-session.target and DMS.
+systemctl --user start --no-block labwc-session.target

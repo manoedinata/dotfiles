@@ -3,8 +3,8 @@
 # Runs as the refresh-rate-auto user service and follows charger events.
 
 OUTPUT=eDP-2
-AC_MODE=1920x1080@144.002
-BATTERY_MODE=1920x1080@60.001
+AC_MODE=1920x1080@144.002Hz
+BATTERY_MODE=1920x1080@60.001Hz
 
 on_ac() {
     # Any power source counts: the barrel charger (ACAD) or USB-C.
@@ -12,17 +12,17 @@ on_ac() {
 }
 
 current_rate() {
-    niri msg --json outputs | jq -r --arg o "$OUTPUT" '.[$o] | .modes[.current_mode].refresh_rate'
+    wlr-randr --json | jq -r --arg o "$OUTPUT" '.[] | select(.name == $o) | .modes[] | select(.current) | .refresh | round'
 }
 
 apply() {
     local mode rate
     if on_ac; then mode=$AC_MODE; else mode=$BATTERY_MODE; fi
-    # niri reports millihertz: 144.002 Hz is 144002.
+    # wlr-randr reports fractional Hz, so compare whole Hz: 144.002 Hz is 144.
     rate=${mode#*@}
-    rate=${rate/./}
+    rate=${rate%%.*}
     [ "$(current_rate)" = "$rate" ] && return
-    niri msg output "$OUTPUT" mode "$mode"
+    wlr-randr --output "$OUTPUT" --mode "$mode"
 }
 
 apply

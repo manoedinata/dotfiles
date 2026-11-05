@@ -1,0 +1,18 @@
+# Alt-Tab switcher, colours taken from the DMS dark palette (~/.cache/dms/dms-colors.json).
+osd.bg.color: #211f24
+osd.border.color: #49454e
+osd.border.width: 1
+osd.label.text.color: #e6e0e9
+
+osd.window-switcher.style-thumbnail.width.max: 80%
+osd.window-switcher.style-thumbnail.padding: 12
+osd.window-switcher.style-thumbnail.item.width: 280
+osd.window-switcher.style-thumbnail.item.height: 210
+osd.window-switcher.style-thumbnail.item.padding: 8
+osd.window-switcher.style-thumbnail.item.icon.size: 40
+osd.window-switcher.style-thumbnail.item.active.border.width: 2
+osd.window-switcher.style-thumbnail.item.active.border.color: #d0bcff
+osd.window-switcher.style-thumbnail.item.active.bg.color: #2b292f
+
+osd.window-switcher.preview.border.width: 2
+osd.window-switcher.preview.border.color: #d0bcff

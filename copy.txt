@@ -4,3 +4,5 @@ etc/systemd/system/nvidia-audio-kick.service
 etc/udev/rules.d/81-nvidia-audio-kick.rules
 etc/tlp.conf
 etc/greetd/config.toml
+etc/lightdm/lightdm.conf.d/50-local.conf
+usr/share/wayland-sessions/labwc-patched.desktop

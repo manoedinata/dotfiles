@@ -1,0 +1,20 @@
+# Titlebar theme using the DMS dark palette (~/.cache/dms/dms-colors.json).
+border.width: 1
+window.active.border.color: #36343a
+window.inactive.border.color: #2b292f
+
+window.active.title.bg.color: #211f24
+window.inactive.title.bg.color: #1d1b20
+window.active.label.text.color: #e6e0e9
+window.inactive.label.text.color: #948f99
+window.label.text.justify: center
+
+window.titlebar.padding.width: 6
+window.titlebar.padding.height: 3
+window.button.width: 26
+window.button.height: 26
+window.button.spacing: 4
+window.button.hover.bg.corner-radius: 13
+
+window.active.button.unpressed.image.color: #cac4cf
+window.inactive.button.unpressed.image.color: #6f6b74

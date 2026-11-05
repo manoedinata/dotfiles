@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=labwc (patched wlroots)
+Comment=labwc with the local fractional scaling patch
+Exec=/home/nata/.local/bin/labwc-patched
+Icon=labwc
+Type=Application
+DesktopNames=labwc;wlroots

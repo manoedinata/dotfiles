@@ -301,7 +301,7 @@ animations {
     // off
 
     // Slow down all animations by this factor. Values below 1 speed them up instead.
-    // slowdown 3.0
+    slowdown 0.5
 }
 
 // Window rules let you adjust behavior for individual windows.
@@ -372,7 +372,8 @@ binds {
     KP_Begin hotkey-overlay-title=null { maximize-column; }
     KP_Down  hotkey-overlay-title=null { focus-workspace-down; }
     KP_Up    hotkey-overlay-title=null { focus-workspace-up; }
-    KP_Enter hotkey-overlay-title=null { spawn "dms" "ipc" "call" "control-center" "toggle"; }
+    KP_Add hotkey-overlay-title=null { spawn "dms" "ipc" "call" "control-center" "toggle"; }
+    KP_Enter hotkey-overlay-title=null { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
     Mod+Shift+M hotkey-overlay-title="Toggle Mirror Display" { spawn "sh" "-c" "exec \"$HOME/.local/bin/display-mode\" toggle"; }
     Mod+P hotkey-overlay-title="Display Mode" { spawn "dms" "ipc" "call" "displayMode" "toggle"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }

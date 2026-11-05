@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Switch between extend and mirror on niri.
-# Extend is niri's normal behaviour. Mirror runs wl-mirror fullscreen on the
+# Switch between extend and mirror on labwc.
+# Extend is the normal behaviour. Mirror runs wl-mirror fullscreen on the
 # external output, showing the laptop panel.
 # Usage: display-mode [status|toggle|mirror|extend]
 
 source_output() {
-    niri msg --json outputs | jq -r 'keys[] | select(startswith("eDP"))' | head -n 1
+    wlr-randr --json | jq -r '.[] | select(.enabled) | .name | select(startswith("eDP"))' | head -n 1
 }
 
 external_output() {
-    niri msg --json outputs | jq -r 'keys[] | select(startswith("eDP") | not)' | head -n 1
+    wlr-randr --json | jq -r '.[] | select(.enabled) | .name | select(startswith("eDP") | not)' | head -n 1
 }
 
 is_mirroring() {
@@ -36,10 +36,7 @@ mirror() {
         return 1
     fi
     is_mirroring && return 0
-    niri msg action spawn -- wl-mirror --fullscreen-output "$dst" "$src"
-    # The new window takes focus on the external output. Hand it back.
-    sleep 0.5
-    niri msg action focus-monitor "$src"
+    setsid -f wl-mirror --fullscreen-output "$dst" "$src"
 }
 
 extend() {
