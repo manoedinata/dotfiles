@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Set the laptop panel to 144 Hz on AC power and 60 Hz on battery.
+# Runs as the refresh-rate-auto user service and follows charger events.
+
+OUTPUT=eDP-2
+AC_MODE=1920x1080@144.002
+BATTERY_MODE=1920x1080@60.001
+
+on_ac() {
+    # Any power source counts: the barrel charger (ACAD) or USB-C.
+    grep -qx 1 /sys/class/power_supply/*/online 2>/dev/null
+}
+
+current_rate() {
+    niri msg --json outputs | jq -r --arg o "$OUTPUT" '.[$o] | .modes[.current_mode].refresh_rate'
+}
+
+apply() {
+    local mode rate
+    if on_ac; then mode=$AC_MODE; else mode=$BATTERY_MODE; fi
+    # niri reports millihertz: 144.002 Hz is 144002.
+    rate=${mode#*@}
+    rate=${rate/./}
+    [ "$(current_rate)" = "$rate" ] && return
+    niri msg output "$OUTPUT" mode "$mode"
+}
+
+apply
+udevadm monitor --udev --subsystem-match=power_supply | while read -r _; do
+    apply
+done

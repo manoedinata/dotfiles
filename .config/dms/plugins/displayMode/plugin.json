@@ -1,0 +1,15 @@
+{
+    "id": "displayMode",
+    "name": "Display Mode",
+    "description": "Switch an external display between mirror and extend, from a dialog or a Control Center tile",
+    "version": "1.1.0",
+    "author": "nata",
+    "type": "composite",
+    "capabilities": ["daemon", "control-center"],
+    "components": {
+        "daemon": "./DisplayModeDaemon.qml",
+        "widget": "./DisplayModeWidget.qml"
+    },
+    "icon": "screen_share",
+    "permissions": ["settings_read"]
+}

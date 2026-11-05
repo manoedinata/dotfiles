@@ -1,0 +1,14 @@
+# Files stow must not link on this machine.
+\.git
+\.gitignore
+\.stow-local-ignore
+^/etc
+# Old CachyOS files, kept in the repo but unused here.
+^/\.bashrc
+^/\.distroboxrc
+^/\.config/containers
+^/\.config/fuzzel
+^/\.config/niri-xdg-terminals\.list
+^/\.config/xdg-terminals\.list
+^/\.local/bin/code-distrobox
+^/\.local/bin/niri-run-or-raise\.sh

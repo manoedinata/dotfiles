@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Switch between extend and mirror on niri.
+# Extend is niri's normal behaviour. Mirror runs wl-mirror fullscreen on the
+# external output, showing the laptop panel.
+# Usage: display-mode [status|toggle|mirror|extend]
+
+source_output() {
+    niri msg --json outputs | jq -r 'keys[] | select(startswith("eDP"))' | head -n 1
+}
+
+external_output() {
+    niri msg --json outputs | jq -r 'keys[] | select(startswith("eDP") | not)' | head -n 1
+}
+
+is_mirroring() {
+    pgrep -x wl-mirror >/dev/null
+}
+
+status() {
+    if [ -z "$(external_output)" ]; then
+        echo none
+    elif is_mirroring; then
+        echo mirror
+    else
+        echo extend
+    fi
+}
+
+mirror() {
+    local src dst
+    src=$(source_output)
+    dst=$(external_output)
+    if [ -z "$dst" ]; then
+        dms ipc call toast warn "No external display connected" >/dev/null 2>&1
+        echo "no external display connected" >&2
+        return 1
+    fi
+    is_mirroring && return 0
+    niri msg action spawn -- wl-mirror --fullscreen-output "$dst" "$src"
+    # The new window takes focus on the external output. Hand it back.
+    sleep 0.5
+    niri msg action focus-monitor "$src"
+}
+
+extend() {
+    pkill -x wl-mirror
+    return 0
+}
+
+case "${1:-status}" in
+    status) status ;;
+    mirror) mirror ;;
+    extend) extend ;;
+    toggle) if is_mirroring; then extend; else mirror; fi ;;
+    *) echo "usage: display-mode [status|toggle|mirror|extend]" >&2; exit 2 ;;
+esac

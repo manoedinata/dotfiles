@@ -1,0 +1,12 @@
+[Unit]
+Description=Switch laptop panel refresh rate with AC power
+PartOf=graphical-session.target
+After=niri.service
+
+[Service]
+ExecStart=%h/.local/bin/refresh-rate-auto
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=niri.service
