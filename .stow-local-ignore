@@ -3,6 +3,8 @@
 \.gitignore
 \.stow-local-ignore
 ^/etc
+^/copy\.txt
+^/copy\.sh
 # Old CachyOS files, kept in the repo but unused here.
 ^/\.bashrc
 ^/\.distroboxrc
