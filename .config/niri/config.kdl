@@ -620,6 +620,8 @@ binds {
     // Mod+Shift+Space { switch-layout "prev"; }
 
     Print { screenshot; }
+    // The laptop's PrtSc key sends Win+Shift+S unless Fn is held.
+    Mod+Shift+S hotkey-overlay-title=null { screenshot; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
 

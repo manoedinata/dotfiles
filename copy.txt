@@ -2,3 +2,5 @@ etc/keyd/default.conf
 usr/local/sbin/nvidia-audio-kick
 etc/systemd/system/nvidia-audio-kick.service
 etc/udev/rules.d/81-nvidia-audio-kick.rules
+etc/tlp.conf
+etc/greetd/config.toml
