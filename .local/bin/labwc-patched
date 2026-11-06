@@ -5,15 +5,22 @@ export LD_LIBRARY_PATH="$HOME/.local/opt/wlroots-patched/lib${LD_LIBRARY_PATH:+:
 # HDMI and DP are wired to the NVIDIA GPU. /etc/environment forces Mesa-only EGL,
 # which left labwc without an NVIDIA renderer, and it then oopsed in
 # nv_drm_framebuffer_create when driving the external display.
-# Display connected at login: allow NVIDIA EGL for labwc.
-# No display at login: keep labwc off the NVIDIA GPU, so a later plug-in cannot crash it.
-# A display plugged in after login needs a new login to appear.
+# Display connected at login, or firmware igpumode=0: allow NVIDIA EGL for labwc.
+# igpumode=0 keeps the GPU attached on battery, so labwc can hold it and HDMI hot-plugs.
+# Otherwise (Hybrid-Auto, igpumode=2) labwc must stay off the NVIDIA GPU: firmware removes
+# it on unplug and the removal hangs while labwc holds it. There, a display plugged in
+# after login needs a new login to appear.
 external=
 for status in /sys/class/drm/card*-HDMI-A-*/status /sys/class/drm/card*-DP-*/status; do
     [ "$(cat "$status" 2>/dev/null)" = connected ] && external=1
 done
 
-if [ -n "$external" ]; then
+igpumode=
+for mode in /sys/class/hwmon/hwmon*/device/igpumode; do
+    [ -r "$mode" ] && igpumode=$(cat "$mode")
+done
+
+if [ -n "$external" ] || [ "$igpumode" = 0 ]; then
     unset __EGL_VENDOR_LIBRARY_FILENAMES
 else
     for card in /sys/class/drm/card[0-9] /sys/class/drm/card[0-9][0-9]; do
