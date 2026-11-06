@@ -25,7 +25,11 @@ park_x=10000
 
 park() {
     # labwc auto-places any output without an explicit position, so set both.
-    wlr-randr --output "$1" --pos 0,0 --output "$2" --pos "$park_x,0"
+    # The panel keeps its position: windows keep their layout coordinates, so
+    # moving the panel would drop them on the other output.
+    local pos
+    pos=$(wlr-randr --json | jq -r --arg o "$1" '.[] | select(.name == $o) | "\(.position.x),\(.position.y)"')
+    wlr-randr --output "$1" --pos "$pos" --output "$2" --pos "$park_x,0"
 }
 
 # Mode changes revert on their own unless confirmed, because a mode the monitor
