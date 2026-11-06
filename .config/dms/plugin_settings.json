@@ -1,5 +1,8 @@
 {
   "displayMode": {
     "enabled": true
+  },
+  "dankKDEConnect": {
+    "enabled": false
   }
 }

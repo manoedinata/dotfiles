@@ -58,7 +58,7 @@
     <keybind key="W-Left"><action name="PreviousWindow" /></keybind>
     <keybind key="W-Up"><action name="PreviousWindow" /></keybind>
     <keybind key="W-h"><action name="PreviousWindow" /></keybind>
-    <keybind key="W-k"><action name="PreviousWindow" /></keybind>
+    <keybind key="W-k"><action name="Execute" command="gnome-network-displays" /></keybind>
     <keybind key="KP_Left"><action name="PreviousWindow" /></keybind>
     <keybind key="W-Right"><action name="NextWindow" /></keybind>
     <keybind key="W-Down"><action name="NextWindow" /></keybind>
