@@ -10,6 +10,7 @@ PluginComponent {
 
     // One of: none, extend, mirror, internal. Comes from `display-mode status`.
     property string mode: "none"
+    readonly property bool hasExternal: mode !== "none"
     property int selectedIndex: 0
 
     // External display modes, from `display-mode modes`.
@@ -89,6 +90,18 @@ PluginComponent {
         }, 0);
     }
 
+    // Keeps the dialog right when a display is plugged in or removed while it is open.
+    function pollStatus() {
+        Proc.runCommand("displayMode.pollStatus", script.concat(["status"]), (stdout, exitCode) => {
+            const next = stdout.trim();
+            if (exitCode !== 0 || next === root.mode)
+                return;
+            root.mode = next;
+            root.loadModes();
+            root.loadPlacement();
+        }, 0);
+    }
+
     function loadModes() {
         Proc.runCommand("displayMode.modes", script.concat(["modes"]), (stdout, exitCode) => {
             if (exitCode !== 0)
@@ -136,8 +149,17 @@ PluginComponent {
     }
 
     function apply(index) {
+        if (!hasExternal)
+            return;
         modal.close();
         Proc.runCommand("displayMode.apply", script.concat([modes[index].key]), (stdout, exitCode) => {}, 0);
+    }
+
+    Timer {
+        interval: 2000
+        repeat: true
+        running: modal.shouldBeVisible
+        onTriggered: root.pollStatus()
     }
 
     Timer {
@@ -272,12 +294,13 @@ PluginComponent {
                                 required property int index
                                 required property var modelData
 
-                                readonly property bool isSelected: root.selectedIndex === index
+                                readonly property bool isSelected: root.hasExternal && root.selectedIndex === index
                                 readonly property bool isActive: root.mode === modelData.key
 
                                 width: (parent.width - Theme.spacingM * (root.modes.length - 1)) / root.modes.length
                                 height: 120
                                 radius: Theme.cornerRadius
+                                opacity: root.hasExternal ? 1 : 0.4
                                 color: {
                                     if (isActive)
                                         return Theme.selectedContainer;
@@ -311,6 +334,7 @@ PluginComponent {
 
                                 MouseArea {
                                     anchors.fill: parent
+                                    enabled: root.hasExternal
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onEntered: root.selectedIndex = modeButton.index
