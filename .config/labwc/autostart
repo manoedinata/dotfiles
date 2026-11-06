@@ -1,7 +1,11 @@
 # labwc has no output config of its own, so set the panel scale here.
 wlr-randr --output eDP-2 --scale 1
+# Reapply the mode confirmed for the external display, if any.
+"$HOME/.local/bin/display-mode" restore-mode
 # Font DPI for X11 apps (96 x 1.25).
 echo "Xft.dpi: 120" | xrdb -merge
 
 # Start the user session target, which pulls in graphical-session.target and DMS.
+# Clear any start limit DMS hit during the previous logout, or it stays down.
+systemctl --user reset-failed dms.service
 systemctl --user start --no-block labwc-session.target

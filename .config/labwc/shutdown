@@ -1,2 +1,2 @@
 # Stop the session target so DMS and session services exit with labwc.
-systemctl --user stop labwc-session.target
+systemctl --user stop dms.service labwc-session.target

@@ -3,6 +3,7 @@
 # Extend is the normal behaviour. Mirror runs wl-mirror fullscreen on the
 # external output, showing the laptop panel.
 # Usage: display-mode [status|toggle|mirror|extend]
+#        display-mode [modes|set-mode MODE|confirm-mode|revert-mode|restore-mode]
 
 source_output() {
     wlr-randr --json | jq -r '.[] | select(.enabled) | .name | select(startswith("eDP"))' | head -n 1
@@ -14,6 +15,99 @@ external_output() {
 
 is_mirroring() {
     pgrep -x wl-mirror >/dev/null
+}
+
+# wl-mirror is only a window, so the external output stays in the layout and the
+# cursor can reach it. While mirroring, park that output past a gap: wlroots clamps
+# the cursor to the nearest output, so it stays on the laptop panel.
+park_file="${XDG_RUNTIME_DIR:-/tmp}/display-mode-parked"
+park_x=10000
+
+park() {
+    local src=$1 dst=$2
+    # labwc auto-places any output without an explicit position, so set both.
+    [ -e "$park_file" ] || wlr-randr --json | jq -r \
+        '[.[] | select(.enabled) | "--output \(.name) --pos \(.position.x),\(.position.y)"] | join(" ")' >"$park_file"
+    wlr-randr --output "$src" --pos 0,0 --output "$dst" --pos "$park_x,0"
+}
+
+unpark() {
+    [ -s "$park_file" ] || return 0
+    # Word splitting is intended: the file holds wlr-randr arguments.
+    wlr-randr $(cat "$park_file") && rm -f "$park_file"
+}
+
+# Mode changes revert on their own unless confirmed, because a mode the monitor
+# cannot show leaves it black. The timer lives here, not in the shell UI, so it
+# still fires if DMS dies. Confirmed modes are stored per monitor.
+pending_file="${XDG_RUNTIME_DIR:-/tmp}/display-mode-pending"
+saved_dir="${XDG_STATE_HOME:-$HOME/.local/state}/display-mode"
+revert_seconds=15
+
+external_json() {
+    wlr-randr --json | jq -c '[.[] | select(.enabled) | select(.name | startswith("eDP") | not)][0] // empty'
+}
+
+mode_filter='def mode_id: "\(.width)x\(.height)@\((.refresh * 1000 | round) / 1000)Hz";'
+
+saved_file() {
+    printf '%s/%s\n' "$saved_dir" "$(jq -r '"\(.make)-\(.model)-\(.serial)"' <<<"$1" | tr -c 'A-Za-z0-9._\n-' _)"
+}
+
+modes() {
+    local ext
+    ext=$(external_json)
+    [ -n "$ext" ] || { echo '{"output":"","modes":[]}'; return 0; }
+    jq -c "$mode_filter"' {output: .name, modes: [.modes[] | {width, height, refresh, current, id: mode_id}] | unique_by(.id)}' <<<"$ext"
+}
+
+set_mode() {
+    local mode=$1 ext name previous token
+    ext=$(external_json)
+    [ -n "$ext" ] || return 1
+    name=$(jq -r .name <<<"$ext")
+    # A second change before confirming still reverts to the last confirmed mode.
+    if [ -s "$pending_file" ]; then
+        read -r _ previous _ _ <"$pending_file"
+    else
+        previous=$(jq -r "$mode_filter"' .modes[] | select(.current) | mode_id' <<<"$ext")
+    fi
+    token="$$-$(date +%s%N)"
+    echo "$name $previous $mode $token" >"$pending_file"
+    if ! wlr-randr --output "$name" --mode "$mode"; then
+        revert_mode
+        return 1
+    fi
+    setsid -f sh -c 'sleep "$1"; exec "$0" revert-mode "$2"' "$0" "$revert_seconds" "$token" >/dev/null 2>&1
+}
+
+confirm_mode() {
+    local mode file
+    [ -s "$pending_file" ] || return 0
+    read -r _ _ mode _ <"$pending_file"
+    file=$(saved_file "$(external_json)")
+    mkdir -p "$saved_dir"
+    echo "$mode" >"$file"
+    rm -f "$pending_file"
+}
+
+# With a token, only revert the change that token belongs to.
+revert_mode() {
+    local name previous token
+    [ -s "$pending_file" ] || return 0
+    read -r name previous _ token <"$pending_file"
+    [ -z "${1:-}" ] || [ "$1" = "$token" ] || return 0
+    wlr-randr --output "$name" --mode "$previous"
+    rm -f "$pending_file"
+}
+
+restore_mode() {
+    local ext file
+    ext=$(external_json)
+    [ -n "$ext" ] || return 0
+    file=$(saved_file "$ext")
+    [ -s "$file" ] || return 0
+    wlr-randr --output "$(jq -r .name <<<"$ext")" --mode "$(cat "$file")"
 }
 
 status() {
@@ -35,12 +129,14 @@ mirror() {
         echo "no external display connected" >&2
         return 1
     fi
+    park "$src" "$dst"
     is_mirroring && return 0
     setsid -f wl-mirror --fullscreen-output "$dst" "$src"
 }
 
 extend() {
     pkill -x wl-mirror
+    unpark
     return 0
 }
 
@@ -49,5 +145,10 @@ case "${1:-status}" in
     mirror) mirror ;;
     extend) extend ;;
     toggle) if is_mirroring; then extend; else mirror; fi ;;
-    *) echo "usage: display-mode [status|toggle|mirror|extend]" >&2; exit 2 ;;
+    modes) modes ;;
+    set-mode) set_mode "$2" ;;
+    confirm-mode) confirm_mode ;;
+    revert-mode) revert_mode "${2:-}" ;;
+    restore-mode) restore_mode ;;
+    *) echo "usage: display-mode [status|toggle|mirror|extend|modes|set-mode MODE|confirm-mode|revert-mode|restore-mode]" >&2; exit 2 ;;
 esac

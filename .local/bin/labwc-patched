@@ -1,4 +1,25 @@
 #!/bin/sh
 # Start labwc on the locally patched wlroots (see ~/.local/opt/wlroots-patched/fractional-snap.patch).
 export LD_LIBRARY_PATH="$HOME/.local/opt/wlroots-patched/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+# HDMI and DP are wired to the NVIDIA GPU. /etc/environment forces Mesa-only EGL,
+# which left labwc without an NVIDIA renderer, and it then oopsed in
+# nv_drm_framebuffer_create when driving the external display.
+# Display connected at login: allow NVIDIA EGL for labwc.
+# No display at login: keep labwc off the NVIDIA GPU, so a later plug-in cannot crash it.
+# A display plugged in after login needs a new login to appear.
+external=
+for status in /sys/class/drm/card*-HDMI-A-*/status /sys/class/drm/card*-DP-*/status; do
+    [ "$(cat "$status" 2>/dev/null)" = connected ] && external=1
+done
+
+if [ -n "$external" ]; then
+    unset __EGL_VENDOR_LIBRARY_FILENAMES
+else
+    for card in /sys/class/drm/card[0-9] /sys/class/drm/card[0-9][0-9]; do
+        [ "$(basename "$(readlink "$card/device/driver" 2>/dev/null)" 2>/dev/null)" = i915 ] &&
+            export WLR_DRM_DEVICES="/dev/dri/${card##*/}"
+    done
+fi
+
 exec labwc "$@"
