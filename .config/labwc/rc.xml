@@ -156,4 +156,8 @@
       <disableWhileTyping>yes</disableWhileTyping>
     </device>
   </libinput>
+  <windowRules>
+    <!-- Mirror mode: keep the wl-mirror window out of Alt+Tab and the taskbar. -->
+    <windowRule identifier="at.yrlf.wl_mirror" skipTaskbar="yes" skipWindowSwitcher="yes" />
+  </windowRules>
 </labwc_config>

@@ -4,6 +4,7 @@
 # external output, showing the laptop panel.
 # Usage: display-mode [status|toggle|mirror|extend]
 #        display-mode [modes|set-mode MODE|confirm-mode|revert-mode|restore-mode]
+#        display-mode [placement|set-placement left|above|right]
 
 source_output() {
     wlr-randr --json | jq -r '.[] | select(.enabled) | .name | select(startswith("eDP"))' | head -n 1
@@ -20,21 +21,11 @@ is_mirroring() {
 # wl-mirror is only a window, so the external output stays in the layout and the
 # cursor can reach it. While mirroring, park that output past a gap: wlroots clamps
 # the cursor to the nearest output, so it stays on the laptop panel.
-park_file="${XDG_RUNTIME_DIR:-/tmp}/display-mode-parked"
 park_x=10000
 
 park() {
-    local src=$1 dst=$2
     # labwc auto-places any output without an explicit position, so set both.
-    [ -e "$park_file" ] || wlr-randr --json | jq -r \
-        '[.[] | select(.enabled) | "--output \(.name) --pos \(.position.x),\(.position.y)"] | join(" ")' >"$park_file"
-    wlr-randr --output "$src" --pos 0,0 --output "$dst" --pos "$park_x,0"
-}
-
-unpark() {
-    [ -s "$park_file" ] || return 0
-    # Word splitting is intended: the file holds wlr-randr arguments.
-    wlr-randr $(cat "$park_file") && rm -f "$park_file"
+    wlr-randr --output "$1" --pos 0,0 --output "$2" --pos "$park_x,0"
 }
 
 # Mode changes revert on their own unless confirmed, because a mode the monitor
@@ -61,6 +52,59 @@ modes() {
     jq -c "$mode_filter"' {output: .name, modes: [.modes[] | {width, height, refresh, current, id: mode_id}] | unique_by(.id)}' <<<"$ext"
 }
 
+# Where the external output sits relative to the panel, stored per monitor.
+placement_file() {
+    printf '%s.placement\n' "$(saved_file "$1")"
+}
+
+placement() {
+    local ext file
+    ext=$(external_json)
+    [ -n "$ext" ] || { echo right; return 0; }
+    file=$(placement_file "$ext")
+    if [ -s "$file" ]; then cat "$file"; else echo right; fi
+}
+
+logical_size() {
+    wlr-randr --json | jq -r --arg o "$1" \
+        '.[] | select(.name == $o) | . as $out | .modes[] | select(.current) | "\(.width / $out.scale | round) \(.height / $out.scale | round)"'
+}
+
+# Lay out both outputs from the saved placement. Coordinates stay positive, so
+# for left and above the panel moves instead of the external output.
+place() {
+    local src dst src_w src_h dst_w dst_h
+    src=$(source_output)
+    dst=$(external_output)
+    [ -n "$dst" ] || return 0
+    read -r src_w src_h <<<"$(logical_size "$src")"
+    read -r dst_w dst_h <<<"$(logical_size "$dst")"
+    case "$(placement)" in
+        left) wlr-randr --output "$dst" --pos 0,0 --output "$src" --pos "$dst_w,0" ;;
+        above) wlr-randr --output "$dst" --pos 0,0 --output "$src" --pos "0,$dst_h" ;;
+        *) wlr-randr --output "$src" --pos 0,0 --output "$dst" --pos "$src_w,0" ;;
+    esac
+}
+
+# Mirroring keeps the external output parked. `extend` places it again later.
+apply_placement() {
+    is_mirroring || place
+}
+
+set_placement() {
+    local where=$1 ext file
+    case "$where" in
+        left | above | right) ;;
+        *) echo "placement must be left, above or right" >&2; return 2 ;;
+    esac
+    ext=$(external_json)
+    [ -n "$ext" ] || return 1
+    file=$(placement_file "$ext")
+    mkdir -p "$saved_dir"
+    echo "$where" >"$file"
+    apply_placement
+}
+
 set_mode() {
     local mode=$1 ext name previous token
     ext=$(external_json)
@@ -78,6 +122,7 @@ set_mode() {
         revert_mode
         return 1
     fi
+    apply_placement
     setsid -f sh -c 'sleep "$1"; exec "$0" revert-mode "$2"' "$0" "$revert_seconds" "$token" >/dev/null 2>&1
 }
 
@@ -99,6 +144,7 @@ revert_mode() {
     [ -z "${1:-}" ] || [ "$1" = "$token" ] || return 0
     wlr-randr --output "$name" --mode "$previous"
     rm -f "$pending_file"
+    apply_placement
 }
 
 restore_mode() {
@@ -106,8 +152,8 @@ restore_mode() {
     ext=$(external_json)
     [ -n "$ext" ] || return 0
     file=$(saved_file "$ext")
-    [ -s "$file" ] || return 0
-    wlr-randr --output "$(jq -r .name <<<"$ext")" --mode "$(cat "$file")"
+    [ -s "$file" ] && wlr-randr --output "$(jq -r .name <<<"$ext")" --mode "$(cat "$file")"
+    apply_placement
 }
 
 status() {
@@ -136,7 +182,7 @@ mirror() {
 
 extend() {
     pkill -x wl-mirror
-    unpark
+    place
     return 0
 }
 
@@ -150,5 +196,7 @@ case "${1:-status}" in
     confirm-mode) confirm_mode ;;
     revert-mode) revert_mode "${2:-}" ;;
     restore-mode) restore_mode ;;
-    *) echo "usage: display-mode [status|toggle|mirror|extend|modes|set-mode MODE|confirm-mode|revert-mode|restore-mode]" >&2; exit 2 ;;
+    placement) placement ;;
+    set-placement) set_placement "${2:-}" ;;
+    *) echo "usage: display-mode [status|toggle|mirror|extend|modes|set-mode MODE|confirm-mode|revert-mode|restore-mode|placement|set-placement left|above|right]" >&2; exit 2 ;;
 esac

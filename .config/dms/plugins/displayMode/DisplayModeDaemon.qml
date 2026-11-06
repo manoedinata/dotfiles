@@ -18,6 +18,26 @@ PluginComponent {
     // Set while a new mode waits for confirmation. display-mode reverts it itself.
     property string pendingMode: ""
     property int revertCountdown: 0
+    // One of: left, above, right. Comes from `display-mode placement`.
+    property string placement: "right"
+
+    readonly property var placements: [
+        {
+            "key": "left",
+            "label": "Left",
+            "icon": "arrow_back"
+        },
+        {
+            "key": "above",
+            "label": "Above",
+            "icon": "arrow_upward"
+        },
+        {
+            "key": "right",
+            "label": "Right",
+            "icon": "arrow_forward"
+        }
+    ]
 
     readonly property var resolutions: {
         const seen = {};
@@ -58,6 +78,7 @@ PluginComponent {
                 root.mode = stdout.trim();
             root.selectedIndex = root.mode === "mirror" ? 1 : 0;
             root.loadModes();
+            root.loadPlacement();
             modal.open();
         }, 0);
     }
@@ -71,6 +92,17 @@ PluginComponent {
             if (current)
                 root.selectedResolution = current.width + "x" + current.height;
         }, 0);
+    }
+
+    function loadPlacement() {
+        Proc.runCommand("displayMode.placement", script.concat(["placement"]), (stdout, exitCode) => {
+            if (exitCode === 0)
+                root.placement = stdout.trim();
+        }, 0);
+    }
+
+    function choosePlacement(key) {
+        Proc.runCommand("displayMode.setPlacement", script.concat(["set-placement", key]), (stdout, exitCode) => root.loadPlacement(), 0);
     }
 
     function chooseMode(id) {
@@ -143,7 +175,7 @@ PluginComponent {
         keepPopoutsOpen: true
         shouldBeVisible: false
         modalWidth: 440
-        modalHeight: root.mode === "none" ? 226 : 446
+        modalHeight: root.mode === "none" ? 226 : 530
         enableShadow: true
         onBackgroundClicked: close()
 
@@ -347,6 +379,66 @@ PluginComponent {
                                                     root.chooseMode(modeRow.modelData.id);
                                             }
                                         }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Column {
+                        width: parent.width
+                        spacing: Theme.spacingS
+                        visible: root.mode !== "none" && root.pendingMode === ""
+
+                        StyledText {
+                            text: "Monitor Placement"
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.surfaceTextMedium
+                        }
+
+                        Row {
+                            width: parent.width
+                            spacing: Theme.spacingM
+
+                            Repeater {
+                                model: root.placements
+
+                                Rectangle {
+                                    id: placementButton
+                                    required property var modelData
+
+                                    readonly property bool isActive: root.placement === modelData.key
+
+                                    width: (parent.width - Theme.spacingM * 2) / 3
+                                    height: 40
+                                    radius: Theme.cornerRadius
+                                    color: isActive ? Theme.selectedContainer : placementMouse.containsMouse ? Theme.primaryHoverLight : Theme.floatingWindowNestedSurface
+
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: Theme.spacingXS
+
+                                        DIcon {
+                                            name: placementButton.modelData.icon
+                                            size: Theme.iconSize - 4
+                                            color: placementButton.isActive ? Theme.accentOnSelectedContainer : Theme.surfaceText
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+
+                                        StyledText {
+                                            text: placementButton.modelData.label
+                                            font.pixelSize: Theme.fontSizeSmall
+                                            color: placementButton.isActive ? Theme.onSelectedContainer : Theme.surfaceText
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: placementMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.choosePlacement(placementButton.modelData.key)
                                     }
                                 }
                             }

@@ -1,8 +1,8 @@
 {
     "id": "displayMode",
     "name": "Display Mode",
-    "description": "Switch an external display between mirror and extend and pick its resolution and refresh rate, from a dialog or a Control Center tile",
-    "version": "1.2.0",
+    "description": "Switch an external display between mirror and extend and pick its resolution, refresh rate and placement, from a dialog or a Control Center tile",
+    "version": "1.3.0",
     "author": "nata",
     "type": "composite",
     "capabilities": ["daemon", "control-center"],
