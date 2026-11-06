@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Switch between extend and mirror on labwc.
+# Switch between extend, mirror and internal on labwc.
 # Extend is the normal behaviour. Mirror runs wl-mirror fullscreen on the
-# external output, showing the laptop panel.
-# Usage: display-mode [status|toggle|mirror|extend]
+# external output, showing the laptop panel. Internal disables the external
+# output, and extend or mirror enable it again.
+# Usage: display-mode [status|toggle|mirror|extend|internal]
 #        display-mode [modes|set-mode MODE|confirm-mode|revert-mode|restore-mode]
 #        display-mode [placement|set-placement left|above|right]
 
@@ -12,6 +13,10 @@ source_output() {
 
 external_output() {
     wlr-randr --json | jq -r '.[] | select(.enabled) | .name | select(startswith("eDP") | not)' | head -n 1
+}
+
+disabled_external() {
+    wlr-randr --json | jq -r '.[] | select(.enabled | not) | .name | select(startswith("eDP") | not)' | head -n 1
 }
 
 is_mirroring() {
@@ -27,9 +32,11 @@ park() {
     # labwc auto-places any output without an explicit position, so set both.
     # The panel keeps its position: windows keep their layout coordinates, so
     # moving the panel would drop them on the other output.
-    local pos
-    pos=$(wlr-randr --json | jq -r --arg o "$1" '.[] | select(.name == $o) | "\(.position.x),\(.position.y)"')
-    wlr-randr --output "$1" --pos "$pos" --output "$2" --pos "$park_x,0"
+    wlr-randr --output "$1" --pos "$(position "$1")" --output "$2" --pos "$park_x,0"
+}
+
+position() {
+    wlr-randr --json | jq -r --arg o "$1" '.[] | select(.name == $o) | "\(.position.x),\(.position.y)"'
 }
 
 # Mode changes revert on their own unless confirmed, because a mode the monitor
@@ -160,8 +167,19 @@ restore_mode() {
     apply_placement
 }
 
+# Undo `internal`. The saved mode and placement apply again as at login.
+enable_external() {
+    local name
+    name=$(disabled_external)
+    [ -n "$name" ] || return 0
+    wlr-randr --output "$name" --on
+    restore_mode
+}
+
 status() {
-    if [ -z "$(external_output)" ]; then
+    if [ -n "$(disabled_external)" ]; then
+        echo internal
+    elif [ -z "$(external_output)" ]; then
         echo none
     elif is_mirroring; then
         echo mirror
@@ -172,6 +190,7 @@ status() {
 
 mirror() {
     local src dst
+    enable_external
     src=$(source_output)
     dst=$(external_output)
     if [ -z "$dst" ]; then
@@ -186,14 +205,31 @@ mirror() {
 
 extend() {
     pkill -x wl-mirror
+    enable_external
     place
     return 0
+}
+
+internal() {
+    local src dst
+    src=$(source_output)
+    dst=$(external_output)
+    if [ -z "$dst" ]; then
+        [ -z "$(disabled_external)" ] || return 0
+        dms ipc call toast warn "No external display connected" >/dev/null 2>&1
+        echo "no external display connected" >&2
+        return 1
+    fi
+    pkill -x wl-mirror
+    # labwc auto-places any output without an explicit position, so pin the panel.
+    wlr-randr --output "$src" --pos "$(position "$src")" --output "$dst" --off
 }
 
 case "${1:-status}" in
     status) status ;;
     mirror) mirror ;;
     extend) extend ;;
+    internal) internal ;;
     toggle) if is_mirroring; then extend; else mirror; fi ;;
     modes) modes ;;
     set-mode) set_mode "$2" ;;
@@ -202,5 +238,5 @@ case "${1:-status}" in
     restore-mode) restore_mode ;;
     placement) placement ;;
     set-placement) set_placement "${2:-}" ;;
-    *) echo "usage: display-mode [status|toggle|mirror|extend|modes|set-mode MODE|confirm-mode|revert-mode|restore-mode|placement|set-placement left|above|right]" >&2; exit 2 ;;
+    *) echo "usage: display-mode [status|toggle|mirror|extend|internal|modes|set-mode MODE|confirm-mode|revert-mode|restore-mode|placement|set-placement left|above|right]" >&2; exit 2 ;;
 esac

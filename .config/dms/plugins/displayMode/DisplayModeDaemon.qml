@@ -8,7 +8,7 @@ import qs.DCommon.Widgets
 PluginComponent {
     id: root
 
-    // One of: none, extend, mirror. Comes from `display-mode status`.
+    // One of: none, extend, mirror, internal. Comes from `display-mode status`.
     property string mode: "none"
     property int selectedIndex: 0
 
@@ -69,6 +69,12 @@ PluginComponent {
             "label": "Mirror",
             "icon": "content_copy",
             "description": "Show the laptop screen on the external display"
+        },
+        {
+            "key": "internal",
+            "label": "Internal Only",
+            "icon": "laptop",
+            "description": "Use only the laptop screen and turn the external display off"
         }
     ]
 
@@ -76,7 +82,7 @@ PluginComponent {
         Proc.runCommand("displayMode.dialogStatus", script.concat(["status"]), (stdout, exitCode) => {
             if (exitCode === 0)
                 root.mode = stdout.trim();
-            root.selectedIndex = root.mode === "mirror" ? 1 : 0;
+            root.selectedIndex = Math.max(0, root.modes.findIndex(m => m.key === root.mode));
             root.loadModes();
             root.loadPlacement();
             modal.open();
@@ -175,7 +181,7 @@ PluginComponent {
         keepPopoutsOpen: true
         shouldBeVisible: false
         modalWidth: 440
-        modalHeight: root.mode === "none" ? 226 : 530
+        modalHeight: root.mode === "none" || root.mode === "internal" ? 226 : 530
         enableShadow: true
         onBackgroundClicked: close()
 
@@ -212,6 +218,10 @@ PluginComponent {
                 break;
             case Qt.Key_2:
                 root.apply(1);
+                event.accepted = true;
+                break;
+            case Qt.Key_3:
+                root.apply(2);
                 event.accepted = true;
                 break;
             case Qt.Key_Escape:
@@ -265,7 +275,7 @@ PluginComponent {
                                 readonly property bool isSelected: root.selectedIndex === index
                                 readonly property bool isActive: root.mode === modelData.key
 
-                                width: (parent.width - Theme.spacingM) / 2
+                                width: (parent.width - Theme.spacingM * (root.modes.length - 1)) / root.modes.length
                                 height: 120
                                 radius: Theme.cornerRadius
                                 color: {
@@ -314,7 +324,7 @@ PluginComponent {
                         width: parent.width
                         height: 170
                         spacing: Theme.spacingM
-                        visible: root.mode !== "none" && root.pendingMode === ""
+                        visible: root.mode !== "none" && root.mode !== "internal" && root.pendingMode === ""
 
                         Repeater {
                             model: [
@@ -388,7 +398,7 @@ PluginComponent {
                     Column {
                         width: parent.width
                         spacing: Theme.spacingS
-                        visible: root.mode !== "none" && root.pendingMode === ""
+                        visible: root.mode !== "none" && root.mode !== "internal" && root.pendingMode === ""
 
                         StyledText {
                             text: "Monitor Placement"
