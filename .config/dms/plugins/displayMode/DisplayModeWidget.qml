@@ -23,9 +23,8 @@ PluginComponent {
     ccWidgetIsActive: mode === "mirror"
 
     onCcWidgetToggled: {
-        Proc.runCommand("displayMode.toggle", script.concat(["toggle"]), (stdout, exitCode) => {
-            root.refresh();
-        }, 0);
+        // The dialog lives in the daemon. Close the Control Center first so it does not cover it.
+        Proc.runCommand("displayMode.openDialog", ["sh", "-c", "dms ipc call control-center hide; dms ipc call displayMode toggle"], (stdout, exitCode) => {}, 0);
     }
 
     Timer {
