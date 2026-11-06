@@ -343,5 +343,10 @@
   "avatarRing": "primary",
   "fontScale": 1.25,
   "desktopContextMenu": "on",
-  "desktopWidgetInstances": []
+  "desktopWidgetInstances": [],
+  "syncComponentAnimationSpeeds": false,
+  "modalAnimationDuration": 0,
+  "popoutAnimationDuration": 150,
+  "animationDuration": 150,
+  "notificationAnimationDuration": 150
 }
