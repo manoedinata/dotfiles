@@ -22,7 +22,8 @@ apply() {
     rate=${mode#*@}
     rate=${rate%%.*}
     [ "$(current_rate)" = "$rate" ] && return
-    wlr-randr --output "$OUTPUT" --mode "$mode"
+    wlr-randr --output "$OUTPUT" --mode "$mode" || return
+    dms ipc call toast info "Refresh rate: $(current_rate) Hz" >/dev/null 2>&1
 }
 
 apply
