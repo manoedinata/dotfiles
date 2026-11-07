@@ -5,6 +5,10 @@ wlr-randr --output eDP-2 --scale 1
 # Font DPI for X11 apps (96 x 1.25).
 echo "Xft.dpi: 120" | xrdb -merge
 
+# Let root GUI apps (GParted via pkexec) use Xwayland. Needs xwaylandPersistence
+# in rc.xml: on-demand Xwayland would drop this grant when it exits.
+xhost +SI:localuser:root >/dev/null
+
 # Start the user session target, which pulls in graphical-session.target and DMS.
 # Clear any start limit DMS hit during the previous logout, or it stays down.
 systemctl --user reset-failed dms.service

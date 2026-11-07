@@ -365,15 +365,6 @@ binds {
     Mod+T hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
     Mod+D hotkey-overlay-title="App Launcher: DMS Spotlight" { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
     Mod+Space hotkey-overlay-title=null { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
-    KP_Left  hotkey-overlay-title=null { focus-column-left; }
-    KP_Right hotkey-overlay-title=null { focus-column-right; }
-    KP_Home  hotkey-overlay-title=null { move-column-left; }
-    KP_Prior hotkey-overlay-title=null { move-column-right; }
-    KP_Begin hotkey-overlay-title=null { maximize-column; }
-    KP_Down  hotkey-overlay-title=null { focus-workspace-down; }
-    KP_Up    hotkey-overlay-title=null { focus-workspace-up; }
-    KP_Add hotkey-overlay-title=null { spawn "dms" "ipc" "call" "control-center" "toggle"; }
-    KP_Enter hotkey-overlay-title=null { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
     Mod+Shift+M hotkey-overlay-title="Toggle Mirror Display" { spawn "sh" "-c" "exec \"$HOME/.local/bin/display-mode\" toggle"; }
     Mod+P hotkey-overlay-title="Display Mode" { spawn "dms" "ipc" "call" "displayMode" "toggle"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }

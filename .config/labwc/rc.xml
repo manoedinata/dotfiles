@@ -2,6 +2,10 @@
 <labwc_config>
   <desktops number="2" />
 
+  <core>
+    <xwaylandPersistence>yes</xwaylandPersistence>
+  </core>
+
   <theme>
     <name>Dank</name>
     <cornerRadius>10</cornerRadius>
@@ -36,8 +40,6 @@
     <keybind key="W-d"><action name="Execute" command="dms ipc call spotlight toggle" /></keybind>
     <keybind key="W-space"><action name="Execute" command="dms ipc call spotlight toggle" /></keybind>
     <keybind key="W-t"><action name="Execute" command="alacritty" /></keybind>
-    <keybind key="KP_Add"><action name="Execute" command="dms ipc call control-center toggle" /></keybind>
-    <keybind key="KP_Enter"><action name="Execute" command="dms ipc call powermenu toggle" /></keybind>
     <keybind key="W-x"><action name="Execute" command="dms ipc call powermenu toggle" /></keybind>
     <keybind key="W-p"><action name="Execute" command="dms ipc call displayMode toggle" /></keybind>
     <keybind key="W-S-m"><action name="Execute" command="/home/nata/.local/bin/display-mode toggle" /></keybind>
@@ -52,19 +54,16 @@
     <keybind key="W-f"><action name="ToggleMaximize" /></keybind>
     <keybind key="W-m"><action name="ToggleMaximize" /></keybind>
     <keybind key="W-C-f"><action name="ToggleMaximize" /></keybind>
-    <keybind key="KP_Begin"><action name="ToggleMaximize" /></keybind>
     <keybind key="W-S-f"><action name="ToggleFullscreen" /></keybind>
     <keybind key="W-c"><action name="AutoPlace" policy="center" /></keybind>
     <keybind key="W-Left"><action name="PreviousWindow" /></keybind>
     <keybind key="W-Up"><action name="PreviousWindow" /></keybind>
     <keybind key="W-h"><action name="PreviousWindow" /></keybind>
     <keybind key="W-k"><action name="Execute" command="gnome-network-displays" /></keybind>
-    <keybind key="KP_Left"><action name="PreviousWindow" /></keybind>
     <keybind key="W-Right"><action name="NextWindow" /></keybind>
     <keybind key="W-Down"><action name="NextWindow" /></keybind>
     <keybind key="W-l"><action name="NextWindow" /></keybind>
     <keybind key="W-j"><action name="NextWindow" /></keybind>
-    <keybind key="KP_Right"><action name="NextWindow" /></keybind>
     <keybind key="W-C-Left"><action name="SnapToEdge" direction="left" /></keybind>
     <keybind key="W-S-Left"><action name="FocusOutput" direction="left" /></keybind>
     <keybind key="W-S-C-Left"><action name="MoveToOutput" direction="left" /></keybind>
@@ -89,8 +88,6 @@
     <keybind key="W-C-j"><action name="SnapToEdge" direction="down" /></keybind>
     <keybind key="W-S-j"><action name="FocusOutput" direction="down" /></keybind>
     <keybind key="W-S-C-j"><action name="MoveToOutput" direction="down" /></keybind>
-    <keybind key="KP_Home"><action name="SnapToEdge" direction="left" /></keybind>
-    <keybind key="KP_Prior"><action name="SnapToEdge" direction="right" /></keybind>
     <keybind key="W-C-Home"><action name="MoveToEdge" direction="left" /></keybind>
     <keybind key="W-C-End"><action name="MoveToEdge" direction="right" /></keybind>
     <keybind key="W-minus"><action name="ResizeRelative" right="-192" /></keybind>
@@ -105,10 +102,8 @@
     <keybind key="W-S-2"><action name="SendToDesktop" to="2" /></keybind>
     <keybind key="W-Next"><action name="GoToDesktop" to="right" /></keybind>
     <keybind key="W-u"><action name="GoToDesktop" to="right" /></keybind>
-    <keybind key="KP_Down"><action name="GoToDesktop" to="right" /></keybind>
     <keybind key="W-Prior"><action name="GoToDesktop" to="left" /></keybind>
     <keybind key="W-i"><action name="GoToDesktop" to="left" /></keybind>
-    <keybind key="KP_Up"><action name="GoToDesktop" to="left" /></keybind>
     <keybind key="W-C-Next"><action name="SendToDesktop" to="right" /></keybind>
     <keybind key="W-C-u"><action name="SendToDesktop" to="right" /></keybind>
     <keybind key="W-C-Prior"><action name="SendToDesktop" to="left" /></keybind>
