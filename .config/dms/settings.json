@@ -348,5 +348,9 @@
   "modalAnimationDuration": 0,
   "popoutAnimationDuration": 150,
   "animationDuration": 150,
-  "notificationAnimationDuration": 150
+  "notificationAnimationDuration": 150,
+  "acMonitorTimeout": 0,
+  "acLockTimeout": 0,
+  "acSuspendTimeout": 0,
+  "acPostLockMonitorTimeout": 0
 }
