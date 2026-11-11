@@ -1,6 +1,16 @@
 #!/bin/sh
-# Start labwc on the locally patched wlroots (see ~/.local/opt/wlroots-patched/fractional-snap.patch).
-export LD_LIBRARY_PATH="$HOME/.local/opt/wlroots-patched/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+# Start labwc on a locally patched wlroots (fractional-snap.patch next to each lib).
+# Default: labwc 0.20.3 built from source in ~/.local/opt/labwc-0.20, linked (rpath) to
+# wlroots 0.20.2 in ~/.local/opt/wlroots-0.20-patched. It adds per-window screen sharing
+# (ext-foreign-toplevel-image-capture-source-v1), which wlroots 0.19 lacks.
+# LABWC_LEGACY=1 (the "labwc 0.9 legacy" session) starts the apt labwc 0.9.3 on the
+# patched wlroots 0.19 in ~/.local/opt/wlroots-patched instead.
+labwc_bin="$HOME/.local/opt/labwc-0.20/bin/labwc"
+if [ -n "$LABWC_LEGACY" ] || [ ! -x "$labwc_bin" ]; then
+    labwc_bin=labwc
+    export LD_LIBRARY_PATH="$HOME/.local/opt/wlroots-patched/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+fi
+unset LABWC_LEGACY
 
 # HDMI and DP are wired to the NVIDIA GPU. /etc/environment forces Mesa-only EGL,
 # which left labwc without an NVIDIA renderer, and it then oopsed in
@@ -29,4 +39,4 @@ else
     done
 fi
 
-exec labwc "$@"
+exec "$labwc_bin" "$@"
