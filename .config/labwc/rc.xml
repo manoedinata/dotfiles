@@ -154,5 +154,7 @@
   <windowRules>
     <!-- Mirror mode: keep the wl-mirror window out of Alt+Tab and the taskbar. -->
     <windowRule identifier="at.yrlf.wl_mirror" skipTaskbar="yes" skipWindowSwitcher="yes" />
+    <!-- Zoom raises/focuses itself on screen share changes and chat; refuse those requests. -->
+    <windowRule identifier="zoom" ignoreFocusRequest="yes" />
   </windowRules>
 </labwc_config>
