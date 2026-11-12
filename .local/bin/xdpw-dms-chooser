@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""xdg-desktop-portal-wlr chooser: DMS dmenu picker with screen markers.
+
+With more than one output, rows become "Screen N: Window: ..." / "Screen N: Monitor: ...".
+Screens are numbered by position (top-to-bottom, then left-to-right). The original
+row is printed back to the portal, as it expects.
+"""
+import json
+import subprocess
+import sys
+
+HELPER = "/home/nata/.local/bin/wlr-toplevel-outputs"
+DMS = ["dms", "dmenu", "-p", "Share screen", "--icon", "screen_share", "--no-custom", "--sync"]
+
+
+def run(cmd):
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=5).stdout
+    except Exception:
+        return ""
+
+
+def main():
+    rows = [r for r in sys.stdin.read().split("\n") if r]
+    if not rows:
+        return 1
+
+    try:
+        outs = json.loads(run(["wlr-randr", "--json"]))
+        outs = [o for o in outs if o.get("enabled", True)]
+        outs.sort(key=lambda o: (o["position"]["y"], o["position"]["x"]))
+        screen = {o["name"]: i + 1 for i, o in enumerate(outs)}
+    except Exception:
+        screen = {}
+
+    labels = rows
+    if len(screen) > 1:
+        # (app_id, title) -> sorted screen numbers
+        win = {}
+        for line in run([HELPER]).splitlines():
+            parts = line.split("\t", 2)
+            if len(parts) == 3 and parts[0] in screen:
+                win.setdefault((parts[1], parts[2]), set()).add(screen[parts[0]])
+
+        def label(row):
+            nums = set()
+            if row.startswith("Monitor: "):
+                name = row[len("Monitor: "):].split(" ", 1)[0]
+                if name in screen:
+                    nums = {screen[name]}
+            elif row.startswith("Window: "):
+                text = row[len("Window: "):]
+                for (app_id, title), n in win.items():
+                    if text in (title, f"{title} ({app_id})", f"{app_id} ({title})"):
+                        nums |= n
+            if not nums:
+                return row
+            return "Screen " + "+".join(map(str, sorted(nums))) + ": " + row
+
+        labels = [label(r) for r in rows]
+
+    res = subprocess.run(DMS + ["--format", "i"], input="\n".join(labels) + "\n",
+                         capture_output=True, text=True)
+    if res.returncode != 0:
+        return res.returncode
+    try:
+        print(rows[int(res.stdout.strip())])
+    except (ValueError, IndexError):
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
