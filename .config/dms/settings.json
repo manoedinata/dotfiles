@@ -255,7 +255,7 @@
     {
       "id": "wifi",
       "enabled": true,
-      "w": 4,
+      "w": 3,
       "h": 1,
       "col": 0,
       "row": 2
@@ -263,9 +263,9 @@
     {
       "id": "bluetooth",
       "enabled": true,
-      "w": 4,
+      "w": 2.5,
       "h": 1,
-      "col": 4,
+      "col": 5.5,
       "row": 2
     },
     {
@@ -338,6 +338,15 @@
       "showMountPath": true,
       "col": 4,
       "row": 4
+    },
+    {
+      "id": "builtin_vpn",
+      "enabled": true,
+      "w": 2.5,
+      "h": 1,
+      "col": 3,
+      "row": 2,
+      "small": true
     }
   ],
   "avatarRing": "primary",
@@ -352,5 +361,6 @@
   "acMonitorTimeout": 0,
   "acLockTimeout": 0,
   "acSuspendTimeout": 0,
-  "acPostLockMonitorTimeout": 0
+  "acPostLockMonitorTimeout": 0,
+  "greeterAutoLogin": true
 }
