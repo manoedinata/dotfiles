@@ -1,6 +1,9 @@
 {
   "displayMode": {
-    "enabled": true
+    "enabled": true,
+    "externalWorkspaces": [
+      "Workspace 3"
+    ]
   },
   "dankKDEConnect": {
     "enabled": false

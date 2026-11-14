@@ -5,7 +5,7 @@ import qs.Modules.Plugins
 PluginComponent {
     id: root
 
-    // One of: none, extend, mirror, internal. Comes from `display-mode status`.
+    // One of: none, extend, mirror, internal, external. Comes from `display-mode status`.
     property string mode: "none"
 
     readonly property var script: ["sh", "-c", "exec \"$HOME/.local/bin/display-mode\" \"$0\""]
@@ -19,8 +19,8 @@ PluginComponent {
 
     ccWidgetIcon: "screen_share"
     ccWidgetPrimaryText: "Mirror Display"
-    ccWidgetSecondaryText: mode === "mirror" ? "Mirror" : mode === "extend" ? "Extend" : mode === "internal" ? "Internal Only" : "No external display"
-    ccWidgetIsActive: mode === "mirror" || mode === "internal"
+    ccWidgetSecondaryText: mode === "mirror" ? "Mirror" : mode === "extend" ? "Extend" : mode === "internal" ? "Internal Only" : mode === "external" ? "External Only" : "No external display"
+    ccWidgetIsActive: mode === "mirror" || mode === "internal" || mode === "external"
 
     onCcWidgetToggled: {
         // The dialog lives in the daemon. Close the Control Center first so it does not cover it.

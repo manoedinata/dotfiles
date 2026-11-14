@@ -1,8 +1,8 @@
 {
     "id": "displayMode",
     "name": "Display Mode",
-    "description": "Switch an external display between mirror, extend and internal only and pick its resolution, refresh rate and placement, from a dialog or a Control Center tile",
-    "version": "1.4.0",
+    "description": "Switch an external display between mirror, extend, internal only and external only and pick its resolution, refresh rate and placement, from a dialog or a Control Center tile, and choose which workspaces live on the external display",
+    "version": "1.6.0",
     "author": "nata",
     "type": "composite",
     "capabilities": ["daemon", "control-center"],
@@ -11,5 +11,5 @@
         "widget": "./DisplayModeWidget.qml"
     },
     "icon": "screen_share",
-    "permissions": ["settings_read"]
+    "permissions": ["settings_read", "settings_write"]
 }

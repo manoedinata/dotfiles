@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Switch between extend, mirror and internal on labwc.
+# Switch between extend, mirror, internal and external on labwc.
 # Extend is the normal behaviour. Mirror runs wl-mirror fullscreen on the
 # external output, showing the laptop panel. Internal disables the external
-# output, and extend or mirror enable it again.
-# Usage: display-mode [status|toggle|mirror|extend|internal]
+# output and external disables the laptop panel; the other modes enable
+# both again.
+# Usage: display-mode [status|toggle|mirror|extend|internal|external]
 #        display-mode [modes|set-mode MODE|confirm-mode|revert-mode|restore-mode]
 #        display-mode [placement|set-placement left|above|right]
 
@@ -13,6 +14,15 @@ source_output() {
 
 external_output() {
     wlr-randr --json | jq -r '.[] | select(.enabled) | .name | select(startswith("eDP") | not)' | head -n 1
+}
+
+# The panel's name even while it is disabled.
+internal_name() {
+    wlr-randr --json | jq -r '.[] | .name | select(startswith("eDP"))' | head -n 1
+}
+
+disabled_internal() {
+    wlr-randr --json | jq -r '.[] | select(.enabled | not) | .name | select(startswith("eDP"))' | head -n 1
 }
 
 disabled_external() {
@@ -87,7 +97,8 @@ place() {
     local src dst src_w src_h dst_w dst_h
     src=$(source_output)
     dst=$(external_output)
-    [ -n "$dst" ] || return 0
+    # Nothing to place against while one of them is off.
+    [ -n "$dst" ] && [ -n "$src" ] || return 0
     read -r src_w src_h <<<"$(logical_size "$src")"
     read -r dst_w dst_h <<<"$(logical_size "$dst")"
     case "$(placement)" in
@@ -176,8 +187,35 @@ enable_external() {
     restore_mode
 }
 
+# Undo `external`.
+enable_internal() {
+    local name
+    name=$(disabled_internal)
+    [ -n "$name" ] || return 0
+    wlr-randr --output "$name" --on
+}
+
+# While the panel is off, turn it back on if the external display goes away,
+# so the session never ends up without a screen.
+watch_external() {
+    local pid_file="${XDG_RUNTIME_DIR:-/tmp}/display-mode-watch.pid"
+    [ -s "$pid_file" ] && kill "$(cat "$pid_file")" 2>/dev/null
+    setsid -f sh -c '
+        echo $$ >"$1"
+        while sleep 2; do
+            [ -n "$("$0" disabled-internal)" ] || break
+            [ -n "$("$0" external-output)" ] && continue
+            "$0" enable-internal
+            dms ipc call toast warn "External display disconnected, laptop screen turned on" >/dev/null 2>&1
+            break
+        done
+        rm -f "$1"' "$0" "$pid_file" >/dev/null 2>&1
+}
+
 status() {
-    if [ -n "$(disabled_external)" ]; then
+    if [ -n "$(disabled_internal)" ] && [ -n "$(external_output)" ]; then
+        echo external
+    elif [ -n "$(disabled_external)" ]; then
         echo internal
     elif [ -z "$(external_output)" ]; then
         echo none
@@ -190,6 +228,7 @@ status() {
 
 mirror() {
     local src dst
+    enable_internal
     enable_external
     src=$(source_output)
     dst=$(external_output)
@@ -205,6 +244,7 @@ mirror() {
 
 extend() {
     pkill -x wl-mirror
+    enable_internal
     enable_external
     place
     return 0
@@ -212,6 +252,7 @@ extend() {
 
 internal() {
     local src dst
+    enable_internal
     src=$(source_output)
     dst=$(external_output)
     if [ -z "$dst" ]; then
@@ -225,11 +266,33 @@ internal() {
     wlr-randr --output "$src" --pos "$(position "$src")" --output "$dst" --off
 }
 
+external() {
+    local src dst
+    pkill -x wl-mirror
+    enable_external
+    src=$(source_output)
+    dst=$(external_output)
+    if [ -z "$dst" ]; then
+        dms ipc call toast warn "No external display connected" >/dev/null 2>&1
+        echo "no external display connected" >&2
+        return 1
+    fi
+    [ -n "$src" ] || return 0
+    # labwc auto-places any output without an explicit position, so pin the external one.
+    wlr-randr --output "$dst" --pos "$(position "$dst")" --output "$src" --off
+    watch_external
+}
+
 case "${1:-status}" in
     status) status ;;
     mirror) mirror ;;
     extend) extend ;;
     internal) internal ;;
+    external) external ;;
+    # Used by the watcher started by `external`.
+    disabled-internal) disabled_internal ;;
+    external-output) external_output ;;
+    enable-internal) enable_internal ;;
     toggle) if is_mirroring; then extend; else mirror; fi ;;
     modes) modes ;;
     set-mode) set_mode "$2" ;;
@@ -238,5 +301,5 @@ case "${1:-status}" in
     restore-mode) restore_mode ;;
     placement) placement ;;
     set-placement) set_placement "${2:-}" ;;
-    *) echo "usage: display-mode [status|toggle|mirror|extend|internal|modes|set-mode MODE|confirm-mode|revert-mode|restore-mode|placement|set-placement left|above|right]" >&2; exit 2 ;;
+    *) echo "usage: display-mode [status|toggle|mirror|extend|internal|external|modes|set-mode MODE|confirm-mode|revert-mode|restore-mode|placement|set-placement left|above|right]" >&2; exit 2 ;;
 esac

@@ -1,5 +1,7 @@
 import QtQuick
+import Quickshell
 import Quickshell.Io
+import Quickshell.WindowManager
 import qs.Common
 import qs.Modals.Common
 import qs.Modules.Plugins
@@ -8,7 +10,7 @@ import qs.DCommon.Widgets
 PluginComponent {
     id: root
 
-    // One of: none, extend, mirror, internal. Comes from `display-mode status`.
+    // One of: none, extend, mirror, internal, external. Comes from `display-mode status`.
     property string mode: "none"
     readonly property bool hasExternal: mode !== "none"
     property int selectedIndex: 0
@@ -76,8 +78,80 @@ PluginComponent {
             "label": "Internal Only",
             "icon": "laptop",
             "description": "Use only the laptop screen and turn the external display off"
+        },
+        {
+            "key": "external",
+            "label": "External Only",
+            "icon": "monitor",
+            "description": "Use only the external display and turn the laptop screen off"
         }
     ]
+
+    // Per-output workspaces (labwc with <desktops perOutput="yes">).
+    // Names of the workspaces that live on the external display, saved in plugin settings.
+    readonly property var externalWorkspaces: pluginData.externalWorkspaces || []
+    readonly property var internalScreen: Quickshell.screens.find(s => isInternal(s.name)) || null
+    readonly property var externalScreen: Quickshell.screens.find(s => !isInternal(s.name)) || null
+    readonly property var internalProjection: internalScreen ? WindowManager.screenProjection(internalScreen) : null
+    readonly property var externalProjection: externalScreen ? WindowManager.screenProjection(externalScreen) : null
+    // Workspaces can only move between displays when labwc runs with per-output workspaces.
+    readonly property bool canBindWorkspaces: !!internalProjection && !!externalProjection && WindowManager.windowsets.some(w => w.canSetProjection)
+    readonly property var workspaceList: WindowManager.windowsets.filter(w => w.shouldDisplay !== false).sort((a, b) => a.name.localeCompare(b.name, undefined, {
+            "numeric": true
+        }))
+    readonly property int workspaceRows: Math.max(1, Math.ceil(workspaceList.length / 6))
+    readonly property int workspaceSectionHeight: canBindWorkspaces ? Theme.spacingL + Theme.fontSizeSmall * 3 + Theme.spacingS * 2 + workspaceRows * 36 + (workspaceRows - 1) * Theme.spacingS + 8 : 0
+
+    function isInternal(name) {
+        return /^(eDP|LVDS|DSI)/.test(name);
+    }
+
+    function isOnScreen(windowset, screen) {
+        const projection = windowset.projection;
+        return !!projection && !!screen && projection.screens.some(s => s.name === screen.name);
+    }
+
+    function shortName(name) {
+        const match = /^Workspace (.+)$/.exec(name);
+        return match ? match[1] : name;
+    }
+
+    // Moves a workspace to the other display and remembers the choice.
+    // labwc refuses to move the last workspace off a display.
+    function toggleWorkspace(windowset) {
+        const toExternal = !isOnScreen(windowset, externalScreen);
+        windowset.setProjection(toExternal ? externalProjection : internalProjection);
+        const list = externalWorkspaces.filter(n => n !== windowset.name);
+        if (toExternal)
+            list.push(windowset.name);
+        pluginService.savePluginData(pluginId, "externalWorkspaces", list);
+    }
+
+    // Puts the saved workspaces on the external display, e.g. after it is plugged in.
+    // Workspaces labwc placed there on its own go back to the laptop screen.
+    function applyWorkspaces() {
+        if (!canBindWorkspaces || externalWorkspaces.length === 0)
+            return;
+        const all = WindowManager.windowsets.filter(w => w.canSetProjection);
+        const extra = all.filter(w => !externalWorkspaces.includes(w.name) && isOnScreen(w, externalScreen));
+        // Move the wanted ones first, so the external display is never left empty.
+        for (const w of all) {
+            if (externalWorkspaces.includes(w.name) && !isOnScreen(w, externalScreen))
+                w.setProjection(externalProjection);
+        }
+        for (const w of extra)
+            w.setProjection(internalProjection);
+    }
+
+    onExternalWorkspacesChanged: applyTimer.restart()
+    onExternalProjectionChanged: applyTimer.restart()
+    onCanBindWorkspacesChanged: applyTimer.restart()
+
+    Timer {
+        id: applyTimer
+        interval: 800
+        onTriggered: root.applyWorkspaces()
+    }
 
     function openDialog() {
         Proc.runCommand("displayMode.dialogStatus", script.concat(["status"]), (stdout, exitCode) => {
@@ -202,8 +276,14 @@ PluginComponent {
         layerNamespace: "dms:display-mode"
         keepPopoutsOpen: true
         shouldBeVisible: false
-        modalWidth: 440
-        modalHeight: root.mode === "none" || root.mode === "internal" ? 226 : 530
+        modalWidth: 540
+        modalHeight: {
+            if (root.mode === "none" || root.mode === "internal")
+                return 226;
+            if (root.mode === "external")
+                return 530 - (Theme.fontSizeSmall + Theme.spacingS + 40 + Theme.spacingL);
+            return 530 + (root.mode === "extend" ? root.workspaceSectionHeight : 0);
+        }
         enableShadow: true
         onBackgroundClicked: close()
 
@@ -244,6 +324,10 @@ PluginComponent {
                 break;
             case Qt.Key_3:
                 root.apply(2);
+                event.accepted = true;
+                break;
+            case Qt.Key_4:
+                root.apply(3);
                 event.accepted = true;
                 break;
             case Qt.Key_Escape:
@@ -422,7 +506,7 @@ PluginComponent {
                     Column {
                         width: parent.width
                         spacing: Theme.spacingS
-                        visible: root.mode !== "none" && root.mode !== "internal" && root.pendingMode === ""
+                        visible: root.mode !== "none" && root.mode !== "internal" && root.mode !== "external" && root.pendingMode === ""
 
                         StyledText {
                             text: "Monitor Placement"
@@ -476,6 +560,65 @@ PluginComponent {
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    Column {
+                        width: parent.width
+                        spacing: Theme.spacingS
+                        visible: root.mode === "extend" && root.pendingMode === "" && root.canBindWorkspaces
+
+                        StyledText {
+                            text: "Workspaces on External Display"
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.surfaceTextMedium
+                        }
+
+                        Flow {
+                            width: parent.width
+                            spacing: Theme.spacingS
+
+                            Repeater {
+                                model: root.workspaceList
+
+                                Rectangle {
+                                    id: workspaceChip
+                                    required property var modelData
+
+                                    readonly property bool isActive: root.isOnScreen(modelData, root.externalScreen)
+
+                                    width: (parent.width - Theme.spacingS * 5) / 6
+                                    height: 36
+                                    radius: Theme.cornerRadius
+                                    color: isActive ? Theme.selectedContainer : workspaceMouse.containsMouse ? Theme.primaryHoverLight : Theme.floatingWindowNestedSurface
+
+                                    StyledText {
+                                        anchors.centerIn: parent
+                                        width: parent.width - Theme.spacingS
+                                        horizontalAlignment: Text.AlignHCenter
+                                        elide: Text.ElideRight
+                                        text: root.shortName(workspaceChip.modelData.name)
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        color: workspaceChip.isActive ? Theme.onSelectedContainer : Theme.surfaceText
+                                    }
+
+                                    MouseArea {
+                                        id: workspaceMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.toggleWorkspace(workspaceChip.modelData)
+                                    }
+                                }
+                            }
+                        }
+
+                        StyledText {
+                            text: "Highlighted workspaces are on the external display."
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.surfaceTextMedium
+                            width: parent.width
+                            wrapMode: Text.WordWrap
                         }
                     }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <labwc_config>
-  <desktops number="2" />
+  <desktops number="3" perOutput="yes" />
 
   <core>
     <xwaylandPersistence>yes</xwaylandPersistence>
