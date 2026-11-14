@@ -1,11 +1,13 @@
 #!/bin/sh
 # Start labwc on a locally patched wlroots (fractional-snap.patch next to each lib).
-# Default: labwc 0.20.3 built from source in ~/.local/opt/labwc-0.20, linked (rpath) to
-# wlroots 0.20.2 in ~/.local/opt/wlroots-0.20-patched. It adds per-window screen sharing
+# Default: labwc 0.20.3 in /opt/henn, linked (rpath) to wlroots 0.20.2 in /opt/henn/lib,
+# both installed by henn-dotfiles/desktop (install.sh). It adds per-window screen sharing
 # (ext-foreign-toplevel-image-capture-source-v1), which wlroots 0.19 lacks.
+# Without it, the older build in ~/.local/opt/labwc-0.20 is used.
 # LABWC_LEGACY=1 (the "labwc 0.9 legacy" session) starts the apt labwc 0.9.3 on the
 # patched wlroots 0.19 in ~/.local/opt/wlroots-patched instead.
-labwc_bin="$HOME/.local/opt/labwc-0.20/bin/labwc"
+labwc_bin=/opt/henn/bin/labwc
+[ -x "$labwc_bin" ] || labwc_bin="$HOME/.local/opt/labwc-0.20/bin/labwc"
 if [ -n "$LABWC_LEGACY" ] || [ ! -x "$labwc_bin" ]; then
     labwc_bin=labwc
     export LD_LIBRARY_PATH="$HOME/.local/opt/wlroots-patched/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
