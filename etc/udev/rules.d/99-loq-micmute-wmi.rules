@@ -1,0 +1,5 @@
+# Fn-F4 (mic mute) arrives as a WMI hotkey event on this GUID. The DKMS
+# legion_laptop driver (legion_wmi) claims it and only logs it; hand it to
+# ideapad_wmi so it becomes KEY_MICMUTE on "Ideapad extra buttons".
+ACTION=="bind", SUBSYSTEM=="wmi", KERNEL=="8FC0DE0C-B4E4-43FD-B0F3-8871711C1294", DRIVER=="legion_wmi", \
+  RUN+="/bin/sh -c 'echo %k > /sys/bus/wmi/drivers/legion_wmi/unbind; echo %k > /sys/bus/wmi/drivers/ideapad_wmi/bind || true'"

@@ -7,3 +7,4 @@ etc/greetd/config.toml
 etc/lightdm/lightdm.conf.d/50-local.conf
 usr/share/wayland-sessions/labwc-patched.desktop
 etc/systemd/logind.conf.d/10-no-lid-suspend-on-ac.conf
+etc/udev/rules.d/99-loq-micmute-wmi.rules
